@@ -1,0 +1,13 @@
+surface_name	site_name	species_name	formation_energy	frequencies	reference
+None	gas	CO2	0.000000000000	[]	GK calc
+None	gas	CO	0.300000000000	[]	GK calc
+None	gas	H2	0.000000000000	[]	GK calc
+None	gas	H2O	0.000000000000	[]	GK_calc
+None	gas	HCOO	0.236000000000	[]	GK_calc
+Cu	hollow	H	0.186927	[]	beta=(0.00446946722444617, -0.2065923419069123)
+Cu	111	CO2	0.724409	[]	beta=(0.3626002105338924, -1.3608493911199981)
+Cu	111	COOH	1.248965	[]	beta=(0.13967318321800026, -0.20017470615545377)
+Cu	111	CO	0.727477	[]	beta=(-0.062079977284048196, 0.6528825921468864)
+#The binding energy of H needs to be added to the barriers as only like that the activation energy is the same as calculated because catmap adds the H energy to the IS
+#Cu	hollow	CO2-H-ele	0.973344	[]	beta=(0.19950782371280606, -0.3444507688126851) CO$_{2(g)}$_to_HCOO$^-_{(aq)}$_base 16.0
+Cu	hollow	CO2-H-ele	1.260271	[]	beta=(0.19950782371280606, -0.3444507688126851) CO$_{2(g)}$_to_HCOO$^-_{(aq)}$_base 16.0

@@ -1,0 +1,65 @@
+#!/usr/bin/python
+import sys
+import numpy as np
+
+
+scaler = 'ThermodynamicScaler'
+input_file = 'energy_input/input_freEn_%s.txt'%sys.argv[1]
+data_file = 'pkl_files/data_%s.pkl'%sys.argv[1]
+
+
+rxn_expressions = [
+          'CO_a <->  CO_g + *_a',
+          'CO2_g + H_h + ele_g   <-> CO2-H-ele_h <-> HCOO_g + *_h',
+          'H2O_g + ele_g + *_h  <-> H_h + OH_g', #Reaction8
+          'CO2_g + *_a <-> CO2_a',
+          'CO2_a + H2O_g + ele_g  <-> COOH_a + OH_g',
+          'COOH_a + ele_g <-> CO_a + OH_g',
+
+          'H2_g <-> H2_g',
+          ]
+
+prefactor_list = [1e13]*len(rxn_expressions)  #Heine: prefactor for CO is 1e8
+surface_names = ['Cu']
+rxn_mechanisms={
+        'HCOO': [2,3],
+        'CO': [4,5,6,1]}
+
+descriptor_names= ['voltage','pH']
+#descriptor_ranges = [[-1.2, -0.62],[6.8, 8.0]]
+descriptor_ranges = [[-1.2, -0.58],[6.8, 8.0]]
+resolution = [80,1]
+temperature = 298
+beta = 0.0
+Upzc = 0.0
+
+sigma_input = ['CH', 1]
+#
+species_definitions = {}
+species_definitions['H2O_g'] = {'pressure':0.1}
+species_definitions['H2_g'] = {'pressure':1}
+species_definitions['CO_g'] = {'pressure':1}
+species_definitions['CO2_g'] = {'pressure':1}
+species_definitions['HCOO_g'] = {'pressure':0.1}
+
+species_definitions['a']={'site_names':['111'],'total':1.0}
+species_definitions['h']={'site_names':['hollow'],'total':1.0}
+species_definitions['CO_a'] = {'n_sites':1, 'sigma_params':[-0.062079977,0.0]}
+species_definitions['H_h'] = {'n_sites':1 }
+species_definitions['COOH_a'] = {'n_sites':1, 'sigma_params':[0.12944862, 0.0 ]}
+species_definitions['CO2_a'] = {'n_sites':1, 'sigma_params':[0.38207784, 0.0 ]}
+species_definitions['CO2-H-ele_h'] = {'n_sites':1, 'sigma_params':[0.19950782, 0.0 ]}
+
+potential_reference_scale = 'SHE'
+extrapolated_potential = 0.0
+voltage_diff_drop = 0.0
+
+gas_thermo_mode = 'frozen_gas'
+adsorbate_thermo_mode = 'frozen_adsorbate'#'harmonic_adsorbate'
+#electrochemical_thermo_mode = 'simple_electrochemical'
+electrochemical_thermo_mode = 'surface_charge_density'
+
+decimal_precision = 200
+tolerance = 1e-60
+max_rootfinding_iterations = 200
+max_bisections = 3
