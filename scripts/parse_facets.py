@@ -46,28 +46,29 @@ def parse_data(alldata,specific_ads=None,ads_and_electron=None,scanning_potentia
             transform_alldata_for_old_routines(alldata,ads_and_electron,scanning_potential)
 
         # Calculating the free energies
-        surfH_free_en_corr=0.14 #Value gotten from H desoprtion study
         for ifac,facet in enumerate(alldata['CO'].keys()):
             read_vibrational_frequencies(ads_and_electron,None,None,facet=facet,vibfile='results/vibrations.pckl',no_water_layer=True)
             add_vibrational_free_energy_corrections(ads_and_electron,facet,no_water_layer=True,references={'C':'CO2'})
 
-            # Manually calculating the free energy correction of the TS to formate
-            from ase.thermochemistry import HarmonicThermo
-            from ase.units import invcm
-            from general_tools import get_reference_vibrational_contribution
-            ads,toads,pH='CO$_{2(g)}$','HCOO$^-_{(aq)}$','base'
-            adsvibs=ads_and_electron[ads]['vibs_ddag_%s'%facet][toads][pH]
-            vibens=[vib*invcm for vib in adsvibs]
-            ads_and_electron[ads]['free_en_corr_ddag_%s'%facet]={toads:{}}
+        # All empirical corrections are in the following
+        surfH_free_en_corr=0.14 #Value gotten from H desoprtion study, used for subtracting at the TS, where H is now part of the adsorbate
+        # Manually calculating the free energy correction of the TS to formate
+        from ase.thermochemistry import HarmonicThermo
+        from ase.units import invcm
+        from general_tools import get_reference_vibrational_contribution
+        ads,toads,pH='CO$_{2(g)}$','HCOO$^-_{(aq)}$','base'
+        adsvibs=ads_and_electron[ads]['vibs_ddag_%s'%facet][toads][pH]
+        vibens=[vib*invcm for vib in adsvibs]
+        ads_and_electron[ads]['free_en_corr_ddag_%s'%facet]={toads:{}}
 
-            eng_corr=HarmonicThermo(vibens).get_helmholtz_energy(298,verbose=False)
-            eng_corr-=get_reference_vibrational_contribution('HCOO',references={'C':'CO2'})
-            #Subtracting the vibrational contribution of one H on the surface as it is now part of the adsorbate
-            eng_corr-=surfH_free_en_corr
-            ads_and_electron[ads]['free_en_corr_ddag_%s'%facet][toads][pH]=eng_corr
+        eng_corr=HarmonicThermo(vibens).get_helmholtz_energy(298,verbose=False)
+        eng_corr-=get_reference_vibrational_contribution('HCOO',references={'C':'CO2'})
+        #Subtracting the vibrational contribution of one H on the surface as it is now part of the adsorbate and not the slab anymore
+        eng_corr-=surfH_free_en_corr
+        ads_and_electron[ads]['free_en_corr_ddag_%s'%facet][toads][pH]=eng_corr
 
-            ads_and_electron[ads]['G_ddag_vs_pot_%s'%facet]={toads:{pH:ads_and_electron[ads]['E_ddag_vs_pot_%s'%facet][toads][pH].copy()}}
-            ads_and_electron[ads]['G_ddag_vs_pot_%s'%facet][toads][pH][1] += ads_and_electron[ads]['free_en_corr_ddag_%s'%facet][toads][pH]
+        ads_and_electron[ads]['G_ddag_vs_pot_%s'%facet]={toads:{pH:ads_and_electron[ads]['E_ddag_vs_pot_%s'%facet][toads][pH].copy()}}
+        ads_and_electron[ads]['G_ddag_vs_pot_%s'%facet][toads][pH][1] += ads_and_electron[ads]['free_en_corr_ddag_%s'%facet][toads][pH]
 
 
         ads_and_electron['CO$_{2(g)}$']['E_111']=[0,0.0]
@@ -75,6 +76,7 @@ def parse_data(alldata,specific_ads=None,ads_and_electron=None,scanning_potentia
         ads_and_electron['CO$_{2(g)}$']['G_111']=[0,0]
         ads_and_electron['CO$_{2(g)}$']['G_vs_pot_111']=[0,0]
         ads_and_electron['CO$_{(g)}$']={'nHe':2}
+
         # Actual calculated Formation free energy of CO leading to a determined correction factor of 0.33
         ads_and_electron['CO$_{(g)}$']['G_vs_pot_%s'%facet]=[0,0.7354919708262795]
         #Applying the CO2 gasphase correction to *CO and CO_g
@@ -83,7 +85,6 @@ def parse_data(alldata,specific_ads=None,ads_and_electron=None,scanning_potentia
 
         ads_and_electron['HCOOH$_{(aq)}$']={'nHe':2}
         ads_and_electron['HCOOH$_{(aq)}$']['G_vs_pot_%s'%facet]=[0,0.4440000000000026]
-
 
         pkl.dump(alldata,open(pkldir,'wb'))
         if ads_and_electron is not None:
